@@ -1,0 +1,230 @@
+const int MotorPinA = 12; // Direction Pin for motor A
+const int MotorSpeedPinA = 3; // Motor Speed for motor A
+const int MotorBrakePinA = 9; // Brake for motor A
+const int MotorPinB = 13; // Direction for motor B
+const int MotorSpeedPinB = 11;// Speed for motor B
+const int MotorBrakePinB = 8;// Breake for motor B
+const int CCW  = LOW; //clockwise assignment
+const int CW = HIGH; //counter clockwise assignment
+const int EchoPinA = A1; // attach for Echo of Sensor 
+const int TrigPinA = A2; //attach for Trig of Sensor 
+const int ButtonPressed = 2; //Button sensing pin
+int WasButtonPressed = 0; // a vairable to is used later in the program
+const int  S0 = 4;    //pins for colour sensor
+const int  S1 = 5;
+const int  S2 = 6;
+const int  S3 = 7;
+int var10 = 0;
+const int sensorOut = A3;
+int frequency = 0;   //declaring vairable for the frequency to be read from the colour sensor
+int var4 = 10; //declaring variable to be used later in the program
+int on = 0;
+int buttonState = 0; //  Declares a vairable that is wether the button has been pressed at the moment in time
+const int ColorSensorPower = A3;
+// defines variables for ultrasonic sensor
+long duration; // variable for the duration of sound wave travel
+int DistanceA;// variable for the distance measurement
+int frequencyR;
+int frequencyB;
+
+void setup() {
+  pinMode(ColorSensorPower, OUTPUT);
+  pinMode(TrigPinA, OUTPUT); // Sets the trigPinA as an output
+  pinMode(EchoPinA, INPUT); // Sets the echoPinA as an input
+  Serial.println("Ultrasonic Sensor Initialized"); // display to the Serial Monitor
+  pinMode(S0,OUTPUT); //setup relivent output and input pins 
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  pinMode(S3, OUTPUT);
+  pinMode(sensorOut, INPUT);
+  Serial.println("Colour Sensor Initalized"); //prints the the serial monitor
+
+  // Declaring Motor A pins 
+  pinMode(MotorPinA, OUTPUT);
+  pinMode(MotorSpeedPinA, OUTPUT);
+  pinMode(MotorBrakePinA, OUTPUT);
+  Serial.println("A Motors Initalized");   //prints the the serial monitor
+
+  
+ 
+
+  // Declaring Motor B pins
+  pinMode(MotorPinB, OUTPUT);
+  pinMode(MotorSpeedPinB, OUTPUT);
+  pinMode(MotorBrakePinB, OUTPUT); 
+  Serial.println("B Motors Initalized"); //prints the the serial monitor
+
+  //Declaring Button Pin
+
+  pinMode(ButtonPressed, INPUT);
+
+  // Set defult motor direction to CW(farwards)
+  digitalWrite(MotorPinA, CW);
+  digitalWrite(MotorPinB, CW);
+
+  // Setting frequency-scaling to 20%
+  digitalWrite(S0,HIGH);
+  digitalWrite(S1,LOW);
+
+  delayMicroseconds(4000); //Small delay at start of program
+  Serial.begin(9600); // // Serial Communication is starting with 9600 of baudrate speed
+
+ 
+    
+  
+}
+void loop() {
+buttonState = digitalRead(ButtonPressed);
+if (buttonState == HIGH) {
+  on = 2;
+  buttonState = LOW;
+  delay(6000);
+}
+while (on > 0){
+  digitalWrite(ColorSensorPower, HIGH);
+  // Sets the trigPins HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(TrigPinA, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPinA, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(EchoPinA, HIGH);
+  // Calculating the distance
+  DistanceA = duration * 0.034 / 2;
+  Serial.println ("Distance = "); //prints the distance that was recorded to the serial monitor
+  Serial.println(DistanceA);
+
+  
+  
+  while (DistanceA > 20){ //while the device is more then 20 cm away from the wall
+    
+    while (var10 < 1){
+      analogWrite(MotorSpeedPinB, 90); //Motor B full speed
+      analogWrite(MotorSpeedPinA, 100);
+      delay(100);
+      var10 = var10 + 2;
+      
+    }
+    
+    analogWrite(MotorSpeedPinB, 90); //Motor B full speed
+    analogWrite(MotorSpeedPinA, 100);  //Motor A slightly lower to make it go streight
+ 
+    // Setting red filtered photodiodes to be read
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,LOW);
+  // Reading the output frequency
+  frequencyR = pulseIn(sensorOut, LOW);
+  // Printing the value on the serial monitor
+  Serial.print("R= ");//printing name
+  Serial.print(frequencyR);//printing RED color frequency
+  Serial.println("  ");
+  // Setting red filtered photodiodes to be read
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,HIGH);
+  // Reading the output frequency
+  frequencyB = pulseIn(sensorOut, LOW);
+  // Printing the value on the serial monitor
+  Serial.print("B= ");//printing name
+  Serial.print(frequencyB);//printing RED color frequency
+  Serial.println("  ");
+  
+    // Sets the trigPins HIGH (ACTIVE) for 10 microseconds
+    digitalWrite(TrigPinA, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TrigPinA, LOW);
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(EchoPinA, HIGH);
+    // Calculating the distance
+    DistanceA = duration * 0.034 / 2;
+    Serial.println ("Distance = "); //prints the distance that was recorded to the serial monitor
+    Serial.println(DistanceA);
+    Serial.println(var4);
+    Serial.println(WasButtonPressed);
+
+  if (((frequencyR > 100) and (frequencyR < 300))and ((frequencyB > 0) and (frequencyB < 150)) and (var4 == 10) and (WasButtonPressed > 0)){ 
+    delay(200);
+    digitalWrite(S2,LOW);
+    digitalWrite(S3,LOW);
+    // Reading the output frequency
+    frequencyR = pulseIn(sensorOut, LOW);
+    // Printing the value on the serial monitor
+    Serial.print("R= ");//printing name
+    Serial.print(frequencyR);//printing RED color frequency
+    Serial.println("  ");
+    // Setting red filtered photodiodes to be read
+    digitalWrite(S2,LOW);
+    digitalWrite(S3,HIGH);
+    // Reading the output frequency
+    frequencyB = pulseIn(sensorOut, LOW);
+    // Printing the value on the serial monitor
+    Serial.print("B= ");//printing name
+    Serial.print(frequencyB);//printing RED color frequency
+    Serial.println("  ");
+    if (((frequencyR > 100) and (frequencyR < 300))and ((frequencyB > 0) and (frequencyB < 150)))  
+      Serial.println("Taking a 5.5 second break");
+      delay(7500);
+      var4 = var4 + 1;
+      break;
+  };
+  if (((frequencyR > 100) and (frequencyR < 300)) and ((frequencyB > 0) and (frequencyB < 150))and (var4 == 11) and (WasButtonPressed > 0)){
+    Serial.print("R= ");//printing name
+    Serial.print(frequency);//printing  frequency
+    Serial.println("  ");
+    Serial.println("Taking a 0.5 second break");
+    delay(300); // wait a bit for the datum to get to the target center
+    
+    analogWrite(MotorSpeedPinB, 0); //Motor B off
+    analogWrite(MotorSpeedPinA, 0);  //Motor A off
+    digitalWrite(MotorBrakePinB, HIGH); //Motor B Break
+    digitalWrite(MotorBrakePinA,HIGH); //Motor A Break
+    Serial.println("Taking a 10 second break");
+    delay(10000); //stop for 10 seconds
+    digitalWrite(MotorBrakePinB, LOW); //Motor B Break
+    digitalWrite(MotorBrakePinA,LOW);
+    digitalWrite(MotorPinB,CW);
+    digitalWrite(MotorPinA,CW);
+    analogWrite(MotorSpeedPinB, 90); //Motor B full speed
+    analogWrite(MotorSpeedPinA, 100);  //Motor A full speed
+    var4 = var4 +1;
+    delay(3000);
+    break;
+  };
+  
+   while (((frequencyR > 100) and (frequencyR < 300)) and ((frequencyB > 0) and (frequencyB < 150)) and (var4 == 12) and (WasButtonPressed > 0)){
+    delay(700);
+    Serial.println ("Stopping for good now");
+    delay(500); //wait a bit for the datum to get to the target center
+    analogWrite(MotorSpeedPinB, 0); //Motor B off
+    analogWrite(MotorSpeedPinA, 0);  //Motor A off
+    digitalWrite(MotorBrakePinB, HIGH); //Motor B Break
+    digitalWrite(MotorBrakePinA,HIGH); //Motor A Break
+    break;
+   };
+    
+  }
+  
+  while ((DistanceA < 20) and (WasButtonPressed == 0)){    //if Sensor is closer then 20cm and the button has never been pressed before
+   
+     delay(6000);
+     digitalWrite(TrigPinA, HIGH);
+     delayMicroseconds(10);
+     digitalWrite(TrigPinA, LOW);
+     // Reads the echoPin, returns the sound wave travel time in microseconds
+     duration = pulseIn(EchoPinA, HIGH);
+     // Calculating the distance
+     DistanceA = duration * 0.034 / 2;
+     if (DistanceA < 10){
+        delay(4000);
+        digitalWrite(MotorPinB, CCW);
+        digitalWrite(MotorPinA, CCW);
+        Serial.println("Wall was Touched");
+        analogWrite(MotorSpeedPinB, 90); //Motor B full speed
+        analogWrite(MotorSpeedPinA, 100);
+        delay(3000);
+        WasButtonPressed += 2;
+     }
+  } 
+    break; //back to main loop
+    }
+  }  
+
+   
